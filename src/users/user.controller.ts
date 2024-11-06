@@ -10,6 +10,7 @@ export class UserController {
 
     @Post('register')
     async register(@Body() userDto: CreateUserDto) {
+        console.log(userDto)
         const user = await this.userService.register(userDto); 
         if(!user) return Response.error('用户名已注册');
         return Response.success(user, '注册成功');

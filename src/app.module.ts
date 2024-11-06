@@ -13,11 +13,11 @@ import { UsersModule } from './users/users.module';
       username: 'root',
       password: 'tuise233',
       database: 'medical',
-      entities: [],
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false
     }),
     TypeOrmModule.forFeature([]),
-    UsersModule
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

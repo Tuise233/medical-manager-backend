@@ -20,6 +20,7 @@ export class UserService {
     }
 
     async register(userDto: CreateUserDto): Promise<User> {
+        if(!userDto) return;
         const { username, password, phone } = userDto;
         const target = await this.userRepository.findOne({ where: { username } });
         if(target) {
@@ -34,6 +35,7 @@ export class UserService {
     }
 
     async login(userDto: LoginUserDto): Promise<{ access_token: string }> {
+        if(!userDto) return;
         const { username, password } = userDto;
         const user = await this.userRepository.findOne({ where: { username } });
         if (!user || user.password !== this.stringToMd5(password)) {

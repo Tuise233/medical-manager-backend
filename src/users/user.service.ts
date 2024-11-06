@@ -41,7 +41,7 @@ export class UserService {
         if (!user || user.password !== this.stringToMd5(password)) {
             return null;
         }
-        const payload = { username: user.username, sub: user.id };
+        const payload = { username: user.username, sub: user.id, role: user.role };
         return {
             access_token: this.jwtService.sign(payload)
         };

@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
+import { RouterModule } from './router/router.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UsersModule } from './users/users.module';
     }),
     TypeOrmModule.forFeature([]),
     UsersModule,
+    RouterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

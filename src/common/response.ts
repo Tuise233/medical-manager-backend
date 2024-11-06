@@ -1,7 +1,7 @@
 export class BaseResponse<T> {
     constructor(
         public code: number,
-        public message: string,
+        public msg: string,
         public data: T,
     ) { }
 
@@ -12,4 +12,4 @@ export class BaseResponse<T> {
     static error<T>(message: string, code = 500, data: T = null): BaseResponse<T> {
         return new BaseResponse(code, message, data);
     }
-}
+} 

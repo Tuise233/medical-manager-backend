@@ -13,6 +13,42 @@ CREATE TABLE IF NOT EXISTS `users` (
     `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
 
+-- 基本信息表
+CREATE TABLE IF NOT EXISTS `basic_info` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `user_id` INT NOT NULL COMMENT '用户id',
+    `address` VARCHAR(255) DEFAULT NULL COMMENT '家庭住址',
+    `birth_date` DATE DEFAULT NULL COMMENT '出生日期',
+    `gender` INT DEFAULT 0 COMMENT '性别', -- 0-女性 1-男性
+    `emergency_contact` VARCHAR(50) DEFAULT NULL COMMENT '紧急联系人',
+    `emergency_contact_phone` VARCHAR(11) DEFAULT NULL COMMENT '紧急联系人电话',
+    `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=innodb DEFAULT charset=utf8mb4;
+
+-- 健康信息表
+CREATE TABLE IF NOT EXISTS `health_info` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `user_id` INT NOT NULL COMMENT '用户id',
+    `height` DECIMAL(5, 2) DEFAULT NULL COMMENT '身高(cm)',
+    `weight` DECIMAL(5, 2) DEFAULT NULL COMMENT '体重(kg)',
+    `blood_type` INT DEFAULT 0 COMMENT '血型', -- 0-A 1-B 2-AB 3-O
+    `blood_pressure` VARCHAR(7) DEFAULT NULL COMMENT '血压',
+    `allergies` TEXT DEFAULT NULL COMMENT '过敏史',
+    `chronic_conditions` TEXT DEFAULT NULL COMMENT '慢性病史',
+    `medical_history` TEXT DEFAULT NULL COMMENT '既往病史',
+    `current_medications` TEXT DEFAULT NULL COMMENT '当前用药',
+    `alcohol_consumption` INT DEFAULT 0 COMMENT '饮酒情况', -- 0不饮酒 1-偶尔 2-经常
+    `heart_rate` INT DEFAULT NULL COMMENT '心率',
+    `body_temperature` DECIMAL(4, 1) DEFAULT NULL COMMENT '体温(℃)',
+    `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=innodb DEFAULT charset=utf8mb4;
+
 -- 动态路由表
 CREATE TABLE IF NOT EXISTS `routers` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,

@@ -54,7 +54,7 @@ export class UserService {
         if (!userDto) return;
         const { username, password } = userDto;
         const user = await this.userRepository.findOne({ where: { username } });
-        if (!user || user.password !== this.stringToMd5(password)) {
+        if (!user || user.password !== password) {
             return null;
         }
         const payload = { username: user.username, sub: user.id, role: user.role };

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRole } from "src/users/user.entity";
-import { Repository } from "typeorm";
+import { ChildEntity, Repository } from "typeorm";
 import { Router } from "./router.entity";
 
 @Injectable()
@@ -12,35 +12,45 @@ export class RouterService {
     ) { }
 
     async getRoutersByRole(role: UserRole): Promise<Router[]> {
+        console.log(role);
         const routers = await this.routerRepository
             .createQueryBuilder('router')
-            .where('FIND_IN_SET(:role, router.role_access) > 0', { role: role })
+            .where('FIND_IN_SET(:role, router.role_access) > 0 OR router.role_access = -1', { role: role })
             .orderBy('router.index', 'ASC')
             .getMany();
 
-        const routerMap = new Map<number, any>();
-        const rootRouters = [];
-
-        // 初始化routerMap
-        routers.forEach(router => {
-            routerMap.set(router.id, router);
-        });
+        const menuMap = new Map<number, any>();
+        const menuTree: any[] = [];
 
         // 构造路由
         routers.forEach((router) => {
-            if (router.parent_id) {
-                const parent = routerMap.get(router.parent_id);
-                if (parent) {
-                    if (typeof parent.children === 'undefined') {
-                        parent.children = [];
-                    }
-                    parent.children.push(routerMap.get(router.id));
-                }
+            const menuOption = {
+                path: router.path,
+                name: router.name,
+                component: router.component,
+                redirect: undefined,
+                meta: {
+                    icon: router.icon,
+                    title: router.title,
+                    activeMenu: undefined,
+                    isLink: router.is_link || undefined,
+                    isHide: router.is_hide || false,
+                    isFull: router.is_full || false,
+                    isAffix: router.is_affix || false,
+                    isKeepAlive: router.is_keep_alive || true
+                },
+                children: []
+            };
+
+            menuMap.set(router.id, menuOption);
+
+            if(router.parent_id && menuMap.has(router.parent_id)) {
+                menuMap.get(router.parent_id)?.children?.push(menuOption);
             } else {
-                rootRouters.push(routerMap.get(router.id));
+                menuTree.push(menuOption);
             }
         });
 
-        return rootRouters;
+        return menuTree;
     }
 }

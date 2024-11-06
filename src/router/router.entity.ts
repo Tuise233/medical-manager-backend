@@ -20,6 +20,9 @@ export class Router {
     @Column()
     component: string;
 
+    @Column()
+    icon: string;
+
     @Column({ nullable: true })
     title: string;
 

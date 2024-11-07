@@ -16,7 +16,7 @@ export class RouterService {
         console.log(role);
         const routers = await this.routerRepository
             .createQueryBuilder('router')
-            .where('FIND_IN_SET(:role, router.role_access) > 0 OR router.role_access = -1', { role: role })
+            .where('router.role_access LIKE :role OR router.role_access LIKE :any', { role: `%${role}%`, any: '%-1%' })
             .orderBy('router.index', 'ASC')
             .getMany();
 

@@ -12,7 +12,6 @@ export class RouterController {
     @Get()
     async getUserRouters(@Req() req: Request) {
         const user = req['user'] as { role: number };
-        const routers = await this.routerService.getRoutersByRole(user.role);
-        return BaseResponse.success(routers);
+        return await this.routerService.getRoutersByRole(user.role);
     }
 }

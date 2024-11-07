@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { UserRole } from "src/users/user.entity";
 import { ChildEntity, Repository } from "typeorm";
 import { Router } from "./router.entity";
+import { BaseResponse } from "src/common/response";
 
 @Injectable()
 export class RouterService {
@@ -11,7 +12,7 @@ export class RouterService {
         private routerRepository: Repository<Router>,
     ) { }
 
-    async getRoutersByRole(role: UserRole): Promise<Router[]> {
+    async getRoutersByRole(role: UserRole): Promise<BaseResponse<Router[]>> {
         console.log(role);
         const routers = await this.routerRepository
             .createQueryBuilder('router')
@@ -51,6 +52,6 @@ export class RouterService {
             }
         });
 
-        return menuTree;
+        return BaseResponse.success(menuTree);
     }
 }

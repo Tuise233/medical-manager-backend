@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { RouterModule } from './router/router.module';
 import { InfoModule } from './info/info.module';
+import { AnnouncementModule } from './announcement/announcement.module';
 
 @Module({
   imports: [
@@ -21,9 +22,10 @@ import { InfoModule } from './info/info.module';
     TypeOrmModule.forFeature([]),
     UsersModule,
     RouterModule,
-    InfoModule
+    InfoModule,
+    AnnouncementModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

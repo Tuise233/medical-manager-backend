@@ -8,6 +8,7 @@ import * as crypto from 'crypto';
 import { LoginUserDto } from "./dto/login-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { BasicInfo, HealthInfo } from "src/info/info.entity";
+import { BaseResponse } from "src/common/response";
 
 @Injectable()
 export class UserService {
@@ -25,12 +26,12 @@ export class UserService {
         return crypto.createHash('md5').update(text).digest('hex');
     }
 
-    async register(userDto: CreateUserDto): Promise<User> {
+    async register(userDto: CreateUserDto): Promise<BaseResponse<User>> {
         if (!userDto) return;
         const { username, password, phone } = userDto;
         const target = await this.userRepository.findOne({ where: { username } });
         if (target) {
-            return null;
+            return BaseResponse.error('用户名已被注册');
         }
 
         const user = this.userRepository.create({
@@ -47,33 +48,34 @@ export class UserService {
         await this.basicRepository.save(basicInfo);
         await this.healthRepository.save(healthInfo);
 
-        return user;
+        return BaseResponse.success(user, '注册成功');
     }
 
-    async login(userDto: LoginUserDto): Promise<{ access_token: string }> {
+    async login(userDto: LoginUserDto): Promise<BaseResponse<{ access_token: string }>> {
         if (!userDto) return;
         const { username, password } = userDto;
         const user = await this.userRepository.findOne({ where: { username } });
         if (!user || user.password !== password) {
-            return null;
+            return BaseResponse.error('用户名或密码错误');
         }
         const payload = { username: user.username, sub: user.id, role: user.role };
-        return {
+        return BaseResponse.success({
             access_token: this.jwtService.sign(payload)
-        };
+        });
     }
 
-    async updateUser(id: number, userDto: UpdateUserDto, isAdmin: boolean): Promise<User> {
+    async updateUser(id: number, userDto: UpdateUserDto, isAdmin: boolean): Promise<BaseResponse<User>> {
         const user = await this.userRepository.findOne({ where: { id } });
         if(!user) {
-            throw new NotFoundException('未找到修改的用户');
+            return BaseResponse.error('未找到修改的用户数据');
         }
 
         if(userDto.role && !isAdmin) {
-            throw new ForbiddenException('你没有足够的权限');
+            return BaseResponse.error('你没有足够的权限');
         }
 
         Object.assign(user, userDto);
-        return await this.userRepository.save(user);
+        await this.userRepository.save(user);
+        return BaseResponse.success(user, '更新用户数据成功');
     }
 }

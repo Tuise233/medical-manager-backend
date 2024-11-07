@@ -14,17 +14,12 @@ export class UserController {
 
     @Post('register')
     async register(@Body() userDto: CreateUserDto) {
-        console.log(userDto)
-        const user = await this.userService.register(userDto);
-        if (!user) return BaseResponse.error('用户名已注册');
-        return BaseResponse.success(user, '注册成功');
+        return await this.userService.register(userDto);
     }
 
     @Post('login')
     async login(@Body() userDto: LoginUserDto) {
-        const token = await this.userService.login(userDto);
-        if (!token) return BaseResponse.error('用户名或密码错误');
-        return BaseResponse.success(token, '登录成功');
+        return await this.userService.login(userDto);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -35,7 +30,6 @@ export class UserController {
         @Req() req: Request
     ) {
         const userRole = req['user']['role'];
-        const result = await this.userService.updateUser(id, userDto, userRole === UserRole.Admin);
-        return BaseResponse.success(result);
+        return await this.userService.updateUser(id, userDto, userRole === UserRole.Admin);
     }
 }

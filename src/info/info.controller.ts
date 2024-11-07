@@ -12,27 +12,21 @@ export class InfoController {
 
     @Get('basic/:id')
     async basicInfo(@Param('id', ParseIntPipe) id: number) {
-        const basicInfo = await this.infoService.getBasicInfoById(id);
-        if (!basicInfo) return BaseResponse.error('未获取到匹配的基本信息');
-        return BaseResponse.success(basicInfo);
+        return await this.infoService.getBasicInfoById(id);
     }
 
     @Get('health/:id')
     async healthInfo(@Param('id', ParseIntPipe) id: number) {
-        const healthInfo = await this.infoService.getHealthInfoById(id);
-        if (!healthInfo) return BaseResponse.error('未获取到匹配的健康信息');
-        return BaseResponse.success(healthInfo);
+        return await this.infoService.getHealthInfoById(id);
     }
 
     @Post('basic/:id')
     async updateBasicInfo(@Param('id', ParseIntPipe) id: number, @Body() infoDto: UpdateBasicInfoDto, @Req() request: Request) {
-        const result = await this.infoService.updateBasicInfo(id, infoDto, { user_id: request['user']['userId'], role: request['user']['role'] });
-        return BaseResponse.success(result);
+        return await this.infoService.updateBasicInfo(id, infoDto, { user_id: request['user']['userId'], role: request['user']['role'] });
     }
 
     @Post('health/:id')
     async updateHealthInfo(@Param('id', ParseIntPipe) id: number, @Body() infoDto: UpdateHealthInfoDto, @Req() request: Request) {
-        const result = await this.infoService.updateHealthInfo(id, infoDto, { user_id: request['user']['userId'], role: request['user']['role'] });
-        return BaseResponse.success(result);
+        return await this.infoService.updateHealthInfo(id, infoDto, { user_id: request['user']['userId'], role: request['user']['role'] });
     }
 }

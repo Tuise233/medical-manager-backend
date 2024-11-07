@@ -13,7 +13,6 @@ export class RouterService {
     ) { }
 
     async getRoutersByRole(role: UserRole): Promise<BaseResponse<Router[]>> {
-        console.log(role);
         const routers = await this.routerRepository
             .createQueryBuilder('router')
             .where('router.role_access LIKE :role OR router.role_access LIKE :any', { role: `%${role}%`, any: '%-1%' })

@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `routers` (
     `is_full` BOOLEAN DEFAULT FALSE,
     `is_affix` BOOLEAN DEFAULT FALSE,
     `is_keep_alive` BOOLEAN DEFAULT TRUE,
-    `role_access` VARCHAR(32) DEFAULT '[]'
+    `role_access` VARCHAR(32) DEFAULT '[]',
 
     FOREIGN KEY (parent_id) REFERENCES routers(id)
 ) ENGINE=innodb DEFAULT charset=utf8mb4;

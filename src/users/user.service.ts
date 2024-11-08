@@ -58,7 +58,7 @@ export class UserService {
         if (!user || user.password !== password) {
             return BaseResponse.error('用户名或密码错误');
         }
-        const payload = { username: user.username, sub: user.id, role: user.role };
+        const payload = { username: user.username, userId: user.id, role: user.role };
         return BaseResponse.success({
             access_token: this.jwtService.sign(payload)
         });

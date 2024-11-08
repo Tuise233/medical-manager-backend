@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS `prescriptions` (
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
 
 -- 药品表
-CREATE TABLE IF NOT EXISTS medications (
+CREATE TABLE IF NOT EXISTS `medications` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL COMMENT '药品名称',
     `description` TEXT DEFAULT NULL COMMENT '药品说明',
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS medications (
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
 
 -- 公告表
-CREATE TABLE IF NOT EXISTS announcements (
+CREATE TABLE IF NOT EXISTS `announcements` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL COMMENT '公告标题',
     `description` TEXT NOT NULL COMMENT '公告内容',
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS announcements (
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
 
 -- 日志表
-CREATE TABLE IF NOT EXISTS logs (
+CREATE TABLE IF NOT EXISTS `logs` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `user_id` INT COMMENT '用户id',
     `action` VARCHAR(255) NOT NULL COMMENT '操作描述',

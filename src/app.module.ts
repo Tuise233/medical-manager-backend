@@ -23,7 +23,7 @@ import { AnnouncementModule } from './announcement/announcement.module';
     UsersModule,
     RouterModule,
     InfoModule,
-    AnnouncementModule
+    AnnouncementModule,
   ],
   controllers: [AppController],
   providers: [AppService],

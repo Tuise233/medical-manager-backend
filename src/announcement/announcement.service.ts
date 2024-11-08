@@ -19,17 +19,17 @@ export class AnnouncementService {
     }
 
     async getValidAnnouncePage(pageDto: SearchAnnounceDto, role: UserRole): Promise<PageResponse<Announcement>> {
-        if (pageDto.valid === false && role !== UserRole.Admin) {
+        if (pageDto.type === 'all' && role !== UserRole.Admin) {
             return PageResponse.error('无法获取公告数据');
         }
-        const { pageNum, pageSize, searchValue, valid } = pageDto;
+        let { pageNum, pageSize, searchValue, type } = pageDto;
         const builder = await this.announcementRepository
             .createQueryBuilder('announce')
             .orderBy('announce.create_date', 'DESC')
             .skip((pageNum - 1) * pageSize)
             .take(pageSize);
 
-        if (valid === false) {
+        if (type === 'valid') {
             builder.andWhere('expire_date > :date', { date: new Date() })
         }
 

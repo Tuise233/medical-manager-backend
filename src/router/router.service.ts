@@ -4,6 +4,8 @@ import { UserRole } from "src/users/user.entity";
 import { ChildEntity, Repository } from "typeorm";
 import { Router } from "./router.entity";
 import { BaseResponse } from "src/common/response";
+import { Request } from "express";
+import { CreateRouterDto } from "./dto/create-router.dto";
 
 @Injectable()
 export class RouterService {
@@ -44,7 +46,7 @@ export class RouterService {
 
             menuMap.set(router.id, menuOption);
 
-            if(router.parent_id && menuMap.has(router.parent_id)) {
+            if (router.parent_id && menuMap.has(router.parent_id)) {
                 menuMap.get(router.parent_id)?.children?.push(menuOption);
             } else {
                 menuTree.push(menuOption);
@@ -52,5 +54,37 @@ export class RouterService {
         });
 
         return BaseResponse.success(menuTree);
+    }
+
+    async getAll(request: Request) {
+        const role: UserRole = request['user']['role'];
+        if (role !== UserRole.Admin) {
+            return BaseResponse.error('没有权限');
+        }
+        const results = await this.routerRepository.find();
+        return BaseResponse.success(results);
+    }
+
+    async saveAll(datas: Router[], request: Request) {
+        const role: UserRole = request['user']['role'];
+        if (role !== UserRole.Admin) {
+            return BaseResponse.error('没有权限');
+        }
+        datas.map((item) => {
+            if (item.parent_id === -1) item.parent_id = null;
+            return item;
+        });
+        await this.routerRepository.save(datas);
+        return BaseResponse.success(null);
+    }
+
+    async create(createDto: CreateRouterDto, request: Request) {
+        const role: UserRole = request['user']['role'];
+        if (role !== UserRole.Admin) {
+            return BaseResponse.error('没有权限');
+        }
+        await this.routerRepository.create(createDto);
+        await this.routerRepository.save(createDto);
+        return BaseResponse.success(null);
     }
 }

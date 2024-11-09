@@ -64,10 +64,16 @@ CREATE TABLE IF NOT EXISTS `routers` (
     `is_full` BOOLEAN DEFAULT FALSE,
     `is_affix` BOOLEAN DEFAULT FALSE,
     `is_keep_alive` BOOLEAN DEFAULT TRUE,
-    `role_access` VARCHAR(32) DEFAULT '[]',
-
-    FOREIGN KEY (parent_id) REFERENCES routers(id)
+    `role_access` VARCHAR(32) DEFAULT '[]'
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
+INSERT INTO `routers` (`id`, `index`, `parent_id`, `path`, `name`, `component`, `icon`, `title`, `is_link`, `is_hide`, `is_full`, `is_affix`, `is_keep_alive`, `role_access`) VALUES
+	(1, 11, NULL, '/home/index', 'home', '/home/index', 'House', '首页', '', 0, 0, 0, 0, '[-1]'),
+	(2, 999, NULL, '/about/index', 'about', '/about/index', 'InfoFilled', '关于项目', '', 0, 0, 0, 0, '[-1]'),
+	(3, 99, NULL, '', 'announce', '', 'ChatLineSquare', '系统公告', NULL, 0, 0, 0, 0, '[-1]'),
+	(4, 99, 3, '/announce/current/index', 'announce_current', '/announce/current/index', 'ChatLineSquare', '当前公告', NULL, 0, 0, 0, 0, '[-1]'),
+	(5, 99, 3, '/announce/manager/index', 'announce_manager', '/announce/manager/index', 'Comment', '管理公告', NULL, 0, 0, 0, 0, '[2]'),
+	(6, 99, NULL, '/router/index', 'router', '/router/index', 'Menu', '路由管理', NULL, 0, 0, 0, 0, '[2]'),
+	(8, 1, NULL, '', '', '', 'HomeFilled', '测试路由', '', 0, 0, 0, 0, '[]');
 
 -- 病历表
 CREATE TABLE IF NOT EXISTS `medical_record` (

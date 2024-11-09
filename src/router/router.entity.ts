@@ -41,6 +41,13 @@ export class Router {
     @Column({ default: true })
     is_keep_alive: boolean;
 
-    @Column({ nullable: true })
-    role_access: number;
+    @Column({
+        nullable: true,
+        type: 'varchar',
+        transformer: {
+            to: (value: number[]) => JSON.stringify(value),
+            from: (value: string) => (value ? JSON.parse(value) : [])
+        }
+    })
+    role_access: number[];
 }

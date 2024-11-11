@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Delete, Param, Req, UseGuards } from "@nestjs/common";
 import { RouterService } from "./router.service";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { Request } from "express";
@@ -30,5 +30,10 @@ export class RouterController {
     @Post('create')
     async create(@Body() createDto: CreateRouterDto, @Req() req: Request) {
         return await this.routerService.create(createDto, req);
+    }
+
+    @Delete(':id')
+    async delete(@Param('id') id: number, @Req() req: Request) {
+        return await this.routerService.delete(id, req);
     }
 }

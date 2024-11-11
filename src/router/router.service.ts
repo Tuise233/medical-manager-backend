@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRole } from "src/users/user.entity";
 import { Repository } from "typeorm";
@@ -155,6 +155,46 @@ export class RouterService {
         const router = await this.routerRepository.create(createDto);
         await this.routerRepository.save(router);
         await this.logService.createLog(userId, `创建路由 ${router.title} (${router.path})`);
+        return BaseResponse.success(null);
+    }
+
+    async delete(id: number, request: Request) {
+        const role: UserRole = request['user']['role'];
+        const userId: number = request['user']['userId'];
+        
+        if (role !== UserRole.Admin) {
+            return BaseResponse.error('没有权限');
+        }
+
+        // 查找要删除的路由
+        const router = await this.routerRepository.findOne({ where: { id } });
+        if (!router) {
+            throw new NotFoundException(`ID为${id}的路由不存在`);
+        }
+
+        // 查找子路由并更新它们的 parent_id 为 NULL
+        const childRouters = await this.routerRepository.find({ where: { parent_id: id } });
+        if (childRouters.length > 0) {
+            await this.routerRepository
+                .createQueryBuilder()
+                .update(Router)
+                .set({ parent_id: null })
+                .where("parent_id = :id", { id })
+                .execute();
+                
+            // 记录子路由变更日志
+            await this.logService.createLog(
+                userId, 
+                `路由 ${router.title} 被删除，其下属 ${childRouters.length} 个子路由已变更为顶级路由`
+            );
+        }
+
+        // 删除路由
+        await this.routerRepository.remove(router);
+
+        // 记录删除日志
+        await this.logService.createLog(userId, `删除路由: ${router.title} (${router.path})`);
+
         return BaseResponse.success(null);
     }
 }

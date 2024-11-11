@@ -75,9 +75,40 @@ export class AnnouncementService {
         if (!target) {
             return BaseResponse.error('未找到更新的目标数据');
         }
+
+        // 记录变更内容
+        const changes: string[] = [];
+        
+        if (target.title !== updateDto.title && target.title?.trim() !== updateDto.title?.trim()) {
+            changes.push(`标题从 "${target.title}" 改为 "${updateDto.title}"`);
+        }
+        
+        if (target.description !== updateDto.description && target.description?.trim() !== updateDto.description?.trim()) {
+            // 为了日志简洁，如果内容太长就截取一部分
+            const oldDesc = target.description.length > 20 ? target.description.substring(0, 20) + '...' : target.description;
+            const newDesc = updateDto.description.length > 20 ? updateDto.description.substring(0, 20) + '...' : updateDto.description;
+            changes.push(`内容从 "${oldDesc}" 改为 "${newDesc}"`);
+        }
+
+        // 比较日期，转换为相同格式后比较
+        const oldExpireDate = target.expire_date.toISOString();
+        const newExpireDate = new Date(updateDto.expire_date).toISOString();
+        if (oldExpireDate !== newExpireDate) {
+            changes.push(`过期时间从 "${target.expire_date.toLocaleString()}" 改为 "${new Date(updateDto.expire_date).toLocaleString()}"`);
+        }
+
+        // 更新数据
         Object.assign(target, updateDto);
         await this.announcementRepository.save(target);
-        await this.logService.createLog(userId, `更新公告 #${target.id} | 标题: ${target.title}`);
+
+        // 记录日志
+        if (changes.length > 0) {
+            const changeLog = `更新公告: #${target.id}:\n${changes.join('\n')}`;
+            await this.logService.createLog(userId, changeLog);
+        } else {
+            await this.logService.createLog(userId, `更新公告: #${target.id} (无实质性更改)`);
+        }
+
         return BaseResponse.success(target);
     }
 

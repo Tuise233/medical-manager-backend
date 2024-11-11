@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { RouterModule } from './router/router.module';
 import { InfoModule } from './info/info.module';
 import { AnnouncementModule } from './announcement/announcement.module';
+import { LogModule } from './log/log.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AnnouncementModule } from './announcement/announcement.module';
     RouterModule,
     InfoModule,
     AnnouncementModule,
+    LogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

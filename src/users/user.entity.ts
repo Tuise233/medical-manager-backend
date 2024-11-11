@@ -9,7 +9,8 @@ export enum UserRole {
 
 export enum UserStatus {
     Active = 0,
-    Banned = 1
+    Banned = 1,
+    Pending = 2
 };
 
 @Entity('users')

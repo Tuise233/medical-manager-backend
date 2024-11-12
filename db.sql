@@ -117,6 +117,8 @@ CREATE TABLE IF NOT EXISTS `announcements` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL COMMENT '公告标题',
     `description` TEXT NOT NULL COMMENT '公告内容',
+    `type` INT DEFAULT 0 COMMENT '公告类型', -- 0-通知 1-政策 2-公告,
+    `is_top` BOOLEAN DEFAULT FALSE COMMENT '是否置顶',
     `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '公告发布时间',
     `expire_date` DATETIME COMMENT '公告过期时间'
 ) ENGINE=innodb DEFAULT charset=utf8mb4;

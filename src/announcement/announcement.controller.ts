@@ -11,9 +11,9 @@ import { UpdateAnnounceDto } from "./dto/update-announce.dto";
 export class AnnouncementController {
     constructor(private readonly announceService: AnnouncementService) { }
 
-    @Get('valid')
-    async getValid(@Query() pageDto: SearchAnnounceDto, @Req() request: Request) {
-        return await this.announceService.getValidAnnouncePage(pageDto, request);
+    @Get('list')
+    async getList(@Query() searchDto: SearchAnnounceDto, @Req() request: Request) {
+        return await this.announceService.getAnnouncePage(searchDto, request);
     }
 
     @Post('new')

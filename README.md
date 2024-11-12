@@ -52,7 +52,6 @@ cd medical-manager-backend
 npm install
 ```
 
-
 3. 配置数据库
 - 创建MySQL数据库
 - 执行`db.sql`初始化数据库表结构
@@ -61,8 +60,10 @@ npm install
 4. 启动项目
 ```
 bash
+
 开发模式
 npm run start:dev
+
 生产模式
 npm run build
 npm run start:prod

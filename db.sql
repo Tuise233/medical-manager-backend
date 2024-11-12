@@ -67,14 +67,16 @@ CREATE TABLE IF NOT EXISTS `routers` (
     `role_access` VARCHAR(32) DEFAULT '[]'
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
 INSERT INTO `routers` (`id`, `index`, `parent_id`, `path`, `name`, `component`, `icon`, `title`, `is_link`, `is_hide`, `is_full`, `is_affix`, `is_keep_alive`, `role_access`) VALUES
-	(1, 11, NULL, '/home/index', 'home', '/home/index', 'House', '首页', '', 0, 0, 0, 0, '[-1]'),
+	(1, 1, NULL, '/home/index', 'home', '/home/index', 'House', '首页', '', 0, 0, 0, 0, '[-1]'),
 	(2, 999, NULL, '/about/index', 'about', '/about/index', 'InfoFilled', '关于项目', '', 0, 0, 0, 0, '[-1]'),
-	(3, 99, NULL, '', 'announce', '', 'ChatLineSquare', '系统公告', NULL, 0, 0, 0, 0, '[-1]'),
+	(3, 99, NULL, '/announce', 'announce', '', 'ChatLineSquare', '系统公告', NULL, 0, 0, 0, 0, '[-1]'),
 	(4, 99, 3, '/announce/current/index', 'announce_current', '/announce/current/index', 'ChatLineSquare', '当前公告', NULL, 0, 0, 0, 0, '[-1]'),
 	(5, 99, 3, '/announce/manager/index', 'announce_manager', '/announce/manager/index', 'Comment', '管理公告', NULL, 0, 0, 0, 0, '[2]'),
 	(6, 99, NULL, '/router/index', 'router', '/router/index', 'Menu', '路由管理', NULL, 0, 0, 0, 0, '[2]'),
-	(8, 1, NULL, '', '', '', 'HomeFilled', '测试路由', '', 0, 0, 0, 0, '[]');
-
+	(8, 99, NULL, '/log/index', 'log', '/log/index', 'Clock', '操作日志', '', 0, 0, 0, 0, '[2]'),
+	(9, 1, NULL, '/admin', '', '', 'User', '用户', '', 0, 0, 0, 0, '[2]'),
+	(10, 1, 9, '/admin/users', 'admin_user', '/admin/users/index', 'User', '用户管理', '', 0, 0, 0, 0, '[2]');
+    
 -- 病历表
 CREATE TABLE IF NOT EXISTS `medical_record` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,

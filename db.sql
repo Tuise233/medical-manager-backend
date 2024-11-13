@@ -111,6 +111,8 @@ CREATE TABLE IF NOT EXISTS `medications` (
     `description` TEXT DEFAULT NULL COMMENT '药品说明',
     `price` INT DEFAULT 0 COMMENT '药品价格',
     `amount` INT DEFAULT 0 COMMENT '库存数量',
+    `category` INT DEFAULT 0 COMMENT '药品分类', -- 0-未知 1-处方药 2-非处方药 3-中药 4-保健品
+    `status` INT DEFAULT 0 COMMENT '药品状态', -- 0-下架 1-上架
     `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
 

@@ -57,7 +57,7 @@ export class AnnouncementService {
         }
 
         const [data, total] = await builder.getManyAndCount();
-        return PageResponse.success(total, Number(pageNum), Number(pageSize), data);
+        return PageResponse.success(total, Math.ceil(total / pageSize), Number(pageSize), data);
     }
 
     async createAnnounce(createDto: CreateAnnounceDto, request: Request): Promise<BaseResponse<Announcement>> {

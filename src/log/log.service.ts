@@ -42,6 +42,6 @@ export class LogService {
         }
 
         const [data, total] = await queryBuilder.getManyAndCount();
-        return PageResponse.success(total, pageNum, pageSize, data);
+        return PageResponse.success(total, Math.ceil(total / pageSize), pageSize, data);
     }
 }

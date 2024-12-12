@@ -60,7 +60,10 @@ export class UserService {
         }
         const payload = { username: user.username, userId: user.id, role: user.role };
         return BaseResponse.success({
-            access_token: this.jwtService.sign(payload)
+            access_token: this.jwtService.sign(payload),
+            userInfo: {
+                name: user.real_name
+            }
         });
     }
 

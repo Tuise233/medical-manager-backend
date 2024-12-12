@@ -29,7 +29,7 @@ export class AdminService {
 
         if (searchValue) {
             queryBuilder.andWhere(
-                '(user.username LIKE :search OR user.phone LIKE :search)',
+                '(user.username LIKE :search OR user.phone LIKE :search OR user.real_name LIKE :search)',
                 { search: `%${searchValue}%` }
             );
         }

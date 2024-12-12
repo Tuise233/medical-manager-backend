@@ -21,6 +21,9 @@ export class User {
     @Column({ length: 32 })
     username: string;
 
+    @Column({ length: 32, default: '' })
+    real_name: string;
+
     @Column({ length: 32 })
     password: string;
 

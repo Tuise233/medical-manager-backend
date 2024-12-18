@@ -9,6 +9,7 @@ import { AnnouncementModule } from './announcement/announcement.module';
 import { LogModule } from './log/log.module';
 import { AdminModule } from './admin/admin.module';
 import { MedicationModule } from './medication/medication.module';
+import { AppointmentModule } from './appointments/appointment.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { MedicationModule } from './medication/medication.module';
     AnnouncementModule,
     LogModule,
     AdminModule,
-    MedicationModule
+    MedicationModule,
+    AppointmentModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -24,30 +24,27 @@ export class BasicInfo {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @OneToOne(() => User, (user) => user.basicInfo, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
-    user: User;
+    @Column()
+    user_id: number;
 
-    @Column({ length: 255, nullable: true })
+    @Column({ nullable: true })
     address: string;
 
     @Column({ type: 'date', nullable: true })
     birth_date: Date;
 
-    @Column({ type: 'enum', enum: Gender, default: Gender.Female })
+    @Column({ default: 0 })
     gender: number;
 
-    @Column({ length: 50, nullable: true })
+    @Column({ nullable: true })
     emergency_contact: string;
 
-    @Column({ length: 11, nullable: true })
+    @Column({ nullable: true })
     emergency_contact_phone: string;
 
-    @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
-    create_date: Date;
-
-    @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
-    update_date: Date;
+    @OneToOne(() => User, (user) => user.basicInfo)
+    @JoinColumn({ name: 'user_id' })
+    user: User;
 }
 
 @Entity('health_info')

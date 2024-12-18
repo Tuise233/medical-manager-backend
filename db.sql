@@ -136,3 +136,20 @@ CREATE TABLE IF NOT EXISTS `logs` (
 
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
+
+-- 预约表
+CREATE TABLE IF NOT EXISTS `appointment` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `patient_id` INT NOT NULL COMMENT '患者ID',
+    `doctor_id` INT NOT NULL COMMENT '医生ID',
+    `description` TEXT NOT NULL COMMENT '预约描述/病情描述',
+    `date_time` DATETIME NOT NULL COMMENT '预约时间',
+    `duration` INT DEFAULT 30 COMMENT '预约时长(分钟)',
+    `status` ENUM('0', '1', '2', '3', '4') DEFAULT '0' COMMENT '预约状态: 0-待处理 1-已接受 2-已拒绝 3-已取消 4-已完成',
+    `reject_reason` TEXT DEFAULT NULL COMMENT '拒绝原因',
+    `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+
+    FOREIGN KEY (`patient_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`doctor_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=innodb DEFAULT charset=utf8mb4;

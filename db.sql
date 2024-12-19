@@ -80,28 +80,44 @@ INSERT INTO `routers` (`id`, `index`, `parent_id`, `path`, `name`, `component`, 
 -- 病历表
 CREATE TABLE IF NOT EXISTS `medical_record` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `patient_id` INT DEFAULT -1 COMMENT '患者id',
-    `doctor_id` INT DEFAULT -1 COMMENT '医生id',
-    `description` TEXT DEFAULT NULL COMMENT '诊断结果',
-    `plan` TEXT DEFAULT NULL COMMENT '治疗方案',
+    `appointment_id` INT NOT NULL COMMENT '关联的预约id',
+    `patient_id` INT NOT NULL COMMENT '患者id',
+    `doctor_id` INT NOT NULL COMMENT '医生id',
+    `chief_complaint` TEXT DEFAULT NULL COMMENT '主诉',
+    `present_illness` TEXT DEFAULT NULL COMMENT '现病史',
+    `past_history` TEXT DEFAULT NULL COMMENT '既往史',
+    `physical_exam` TEXT DEFAULT NULL COMMENT '体格检查',
+    `diagnosis` TEXT DEFAULT NULL COMMENT '诊断结果',
+    `treatment_plan` TEXT DEFAULT NULL COMMENT '治疗方案',
+    `note` TEXT DEFAULT NULL COMMENT '备注',
+    `status` INT DEFAULT 0 COMMENT '状态', -- 0-初始化 1-已完成
     `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间'
+    `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+
+    FOREIGN KEY (appointment_id) REFERENCES appointment(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES users(id),
+    FOREIGN KEY (doctor_id) REFERENCES users(id)
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
 
 -- 医嘱表
 CREATE TABLE IF NOT EXISTS `prescriptions` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `record_id` INT DEFAULT -1 COMMENT '病历id',
-    `patient_id` INT DEFAULT -1 COMMENT '患者id',
-    `doctor_id` INT DEFAULT -1 COMMENT '医生id',
-    `description` TEXT DEFAULT NULL COMMENT '医嘱内容',
-    `status` INT DEFAULT 0 COMMENT '医嘱状态', -- 0-未完成 1-完成
+    `record_id` INT NOT NULL COMMENT '病历id',
+    `patient_id` INT NOT NULL COMMENT '患者id',
+    `doctor_id` INT NOT NULL COMMENT '医生id',
+    `type` INT DEFAULT 0 COMMENT '医嘱类型', -- 0-用药医嘱 1-检查医嘱 2-其他医嘱
+    `description` TEXT NOT NULL COMMENT '医嘱内容',
+    `frequency` VARCHAR(50) DEFAULT NULL COMMENT '用药频次',
+    `dosage` VARCHAR(50) DEFAULT NULL COMMENT '用药剂量',
+    `duration` INT DEFAULT NULL COMMENT '用药天数',
+    `note` TEXT DEFAULT NULL COMMENT '备注',
+    `status` INT DEFAULT 0 COMMENT '医嘱状态', -- 0-未执行 1-执行中 2-已完成 3-已取消
     `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
 
-    FOREIGN KEY (record_id) REFERENCES medical_record(id),
-    FOREIGN KEY (doctor_id) REFERENCES users(id),
-    FOREIGN KEY (patient_id) REFERENCES users(id)
+    FOREIGN KEY (record_id) REFERENCES medical_record(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES users(id),
+    FOREIGN KEY (doctor_id) REFERENCES users(id)
 ) ENGINE=innodb DEFAULT charset=utf8mb4;
 
 -- 药品表

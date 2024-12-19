@@ -12,6 +12,7 @@ import { BaseResponse } from "src/common/response";
 import { SearchPatientDto } from "./dto/search-patient.dto";
 import { UpdateHealthInfoDto } from "./dto/update-health.dto";
 import { UpdateBasicInfoDto } from "./dto/update-basic.dto";
+import { LogService } from "src/log/log.service";
 
 @Injectable()
 export class UserService {
@@ -23,6 +24,7 @@ export class UserService {
         @InjectRepository(HealthInfo)
         private healthRepository: Repository<HealthInfo>,
         private jwtService: JwtService,
+        private logService: LogService
     ) { }
 
     private stringToMd5(text: string) {
@@ -51,6 +53,11 @@ export class UserService {
         await this.basicRepository.save(basicInfo);
         await this.healthRepository.save(healthInfo);
 
+        await this.logService.createLog(
+            user.id,
+            `新用户注册: ${user.username} (${user.role === UserRole.Doctor ? '医生' : '患者'})`
+        );
+
         return BaseResponse.success(user, '注册成功');
     }
 
@@ -62,6 +69,10 @@ export class UserService {
             return BaseResponse.error('用户名或密码错误');
         }
         const payload = { username: user.username, userId: user.id, role: user.role };
+        await this.logService.createLog(
+            user.id,
+            `用户登录: ${user.username}`
+        );
         return BaseResponse.success({
             access_token: this.jwtService.sign(payload),
             userInfo: {
@@ -82,6 +93,10 @@ export class UserService {
 
         Object.assign(user, userDto);
         await this.userRepository.save(user);
+        await this.logService.createLog(
+            isAdmin,
+            `更新用户 #${id} 信息: ${Object.keys(userDto).join(', ')}`
+        );
         return BaseResponse.success(user, '更新用户数据成功');
     }
 
@@ -218,7 +233,7 @@ export class UserService {
         });
     }
 
-    async updatePatientHealthInfo(id: number, data: UpdateHealthInfoDto): Promise<BaseResponse<any>> {
+    async updatePatientHealthInfo(id: number, data: UpdateHealthInfoDto, operatorId: number): Promise<BaseResponse<any>> {
         const patient = await this.userRepository.findOne({
             where: { id },
             relations: ['healthInfo']
@@ -253,10 +268,15 @@ export class UserService {
             body_temperature: patient.healthInfo.body_temperature
         };
 
+        await this.logService.createLog(
+            operatorId,
+            `更新患者 #${id} 的健康信息`
+        );
+
         return BaseResponse.success(result, '更新健康信息成功');
     }
 
-    async updatePatientBasicInfo(id: number, data: UpdateBasicInfoDto): Promise<BaseResponse<any>> {
+    async updatePatientBasicInfo(id: number, data: UpdateBasicInfoDto, operatorId: number): Promise<BaseResponse<any>> {
         const patient = await this.userRepository.findOne({
             where: { id },
             relations: ['basicInfo']
@@ -285,6 +305,11 @@ export class UserService {
             emergency_contact: patient.basicInfo.emergency_contact,
             emergency_contact_phone: patient.basicInfo.emergency_contact_phone
         };
+
+        await this.logService.createLog(
+            operatorId,
+            `更新患者 #${id} 的基本信息`
+        );
 
         return BaseResponse.success(result, '更新基本信息成功');
     }

@@ -86,7 +86,7 @@ export class UserController {
             return BaseResponse.error('没有权限更新该患者的健康信息');
         }
 
-        return await this.userService.updatePatientHealthInfo(id, data);
+        return await this.userService.updatePatientHealthInfo(id, data, userId);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -103,6 +103,6 @@ export class UserController {
             return BaseResponse.error('没有权限更新该患者的基本信息');
         }
 
-        return await this.userService.updatePatientBasicInfo(id, data);
+        return await this.userService.updatePatientBasicInfo(id, data, userId);
     }
 }

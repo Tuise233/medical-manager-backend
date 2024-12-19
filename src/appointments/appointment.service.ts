@@ -8,6 +8,9 @@ import { BaseResponse, PageResponse } from "src/common/response";
 import { UpdateAppointmentDto } from "./dto/update-appointment.dto";
 import { User, UserRole } from "src/users/user.entity";
 import { SearchAppointmentDto } from "./dto/search-appointment.dto";
+import { MedicalRecord } from "src/medical-record/medical-record.entity";
+import { Prescription } from "src/prescription/prescription.entity";
+import { UpdateRecordDto } from "./dto/update-record.dto";
 
 @Injectable()
 export class AppointmentService {
@@ -16,6 +19,10 @@ export class AppointmentService {
         private appRepository: Repository<Appointment>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(MedicalRecord)
+        private recordRepository: Repository<MedicalRecord>,
+        @InjectRepository(Prescription)
+        private prescriptionRepository: Repository<Prescription>,
         private logService: LogService
     ) { }
 
@@ -80,6 +87,28 @@ export class AppointmentService {
             return BaseResponse.error('没有权限修改此预约');
         }
 
+        const oldStatus = appointment.status;
+        Object.assign(appointment, dto);
+
+        // 如果医生接受预约，创建病历和医嘱记录
+        if (dto.status === AppointmentStatus.Accepted && oldStatus === AppointmentStatus.Pending) {
+            // 创建病历记录
+            const record = this.recordRepository.create({
+                appointment_id: appointment.id,
+                patient_id: appointment.patient.id,
+                doctor_id: appointment.doctor.id,
+                chief_complaint: appointment.description, // 使用预约描述作为主诉的初始值
+                status: 0
+            });
+            await this.recordRepository.save(record);
+            await this.logService.createLog(
+                userId,
+                `接受预约 #${appointment.id}，已创建病历`
+            );
+        }
+
+        await this.appRepository.save(appointment);
+
         const statusText = {
             [AppointmentStatus.Pending]: '待处理',
             [AppointmentStatus.Accepted]: '已接受',
@@ -88,22 +117,11 @@ export class AppointmentService {
             [AppointmentStatus.Completed]: '已完成'
         };
 
-        const changes: string[] = [];
-        if (appointment.status !== dto.status) {
-            changes.push(`状态从 "${statusText[appointment.status]}" 改为 "${statusText[dto.status]}"`);
-        }
-
-        if (dto.reject_reason && dto.status === AppointmentStatus.Rejected) {
-            changes.push(`拒绝原因: ${dto.reject_reason}`);
-        }
-
-        Object.assign(appointment, dto);
-
-        await this.appRepository.save(appointment);
         await this.logService.createLog(
             userId,
-            `更新预约 #${appointment.id}:\n${changes.join('\n')}`
-        )
+            `更新预约 #${appointment.id} 状态: ${statusText[oldStatus]} -> ${statusText[dto.status]}`
+        );
+
         return BaseResponse.success(appointment);
     }
 
@@ -116,7 +134,7 @@ export class AppointmentService {
             .createQueryBuilder('appointment')
             .leftJoinAndSelect('appointment.doctor', 'doctor')
             .leftJoinAndSelect('appointment.patient', 'patient')
-            .orderBy('appointment.date_time', 'DESC')
+            .orderBy('appointment.create_date', 'DESC')
             .skip((pageNum - 1) * pageSize)
             .take(pageSize);
 
@@ -150,5 +168,192 @@ export class AppointmentService {
         const [appointments, total] = await queryBuilder.getManyAndCount();
 
         return PageResponse.success(total, pageNum, pageSize, appointments);
+    }
+
+    async getAppointmentRecord(appointmentId: number, userId: number, role: UserRole) {
+        const appointment = await this.appRepository.findOne({
+            where: { id: appointmentId },
+            relations: ['patient', 'doctor']
+        });
+
+        if (!appointment) {
+            return BaseResponse.error('预约不存在');
+        }
+
+        // 权限检查：只有相关的医生、患者本人和管理员可以查看
+        if (role !== UserRole.Admin 
+            && appointment.doctor.id !== userId 
+            && appointment.patient.id !== userId) {
+            return BaseResponse.error('没有权限查看该记录');
+        }
+
+        // 获取病历记录
+        const record = await this.recordRepository.findOne({
+            where: { appointment_id: appointmentId },
+            relations: [
+                'patient',
+                'doctor',
+                'prescriptions',
+                'prescriptions.doctor'
+            ]
+        });
+
+        if (!record) {
+            return BaseResponse.error('未找到相关病历记录');
+        }
+
+        // 格式化返回数据
+        const result = {
+            // 病历信息
+            record: {
+                id: record.id,
+                chief_complaint: record.chief_complaint,
+                present_illness: record.present_illness,
+                past_history: record.past_history,
+                physical_exam: record.physical_exam,
+                diagnosis: record.diagnosis,
+                treatment_plan: record.treatment_plan,
+                note: record.note,
+                status: record.status,
+                create_date: record.create_date,
+                update_date: record.update_date
+            },
+            // 医生信息
+            doctor: {
+                id: record.doctor.id,
+                username: record.doctor.username,
+                real_name: record.doctor.real_name,
+                phone: record.doctor.phone
+            },
+            // 患者信息
+            patient: {
+                id: record.patient.id,
+                username: record.patient.username,
+                real_name: record.patient.real_name,
+                phone: record.patient.phone
+            },
+            // 医嘱列表
+            prescriptions: record.prescriptions.map(p => ({
+                id: p.id,
+                type: p.type,
+                description: p.description,
+                frequency: p.frequency,
+                dosage: p.dosage,
+                duration: p.duration,
+                note: p.note,
+                status: p.status,
+                create_date: p.create_date,
+                update_date: p.update_date,
+                doctor: {
+                    id: p.doctor.id,
+                    real_name: p.doctor.real_name
+                }
+            }))
+        };
+
+        return BaseResponse.success(result);
+    }
+
+    async updateAppointmentRecord(appointmentId: number, data: UpdateRecordDto, userId: number, role: UserRole) {
+        const appointment = await this.appRepository.findOne({
+            where: { id: appointmentId },
+            relations: ['patient', 'doctor']
+        });
+
+        if (!appointment) {
+            return BaseResponse.error('预约不存在');
+        }
+
+        // 只有主治医生可以更新病历
+        if (role !== UserRole.Admin && appointment.doctor.id !== userId) {
+            return BaseResponse.error('只有主治医生可以更新病历');
+        }
+
+        // 获取病历记录
+        const record = await this.recordRepository.findOne({
+            where: { appointment_id: appointmentId },
+            relations: ['prescriptions']
+        });
+
+        if (!record) {
+            return BaseResponse.error('未找到相关病历记录');
+        }
+
+        // 更新病历信息
+        Object.assign(record, data.record);
+        await this.recordRepository.save(record);
+
+        // 更新医嘱信息
+        for (const prescriptionData of data.prescriptions) {
+            if (prescriptionData.id) {
+                // 更新现有医嘱
+                const prescription = await this.prescriptionRepository.findOne({
+                    where: { 
+                        id: prescriptionData.id,
+                        record_id: record.id
+                    }
+                });
+
+                if (prescription) {
+                    Object.assign(prescription, prescriptionData);
+                    await this.prescriptionRepository.save(prescription);
+                }
+            } else {
+                // 创建新医嘱
+                const newPrescription = this.prescriptionRepository.create({
+                    ...prescriptionData,
+                    record_id: record.id,
+                    patient_id: appointment.patient.id,
+                    doctor_id: userId
+                });
+                await this.prescriptionRepository.save(newPrescription);
+            }
+        }
+
+        // 记录操作日志
+        await this.logService.createLog(
+            userId,
+            `更新预约 #${appointmentId} 的病历和医嘱记录`
+        );
+
+        return BaseResponse.success(null, '更新成功');
+    }
+
+    async deletePrescription(appointmentId: number, prescriptionId: number, userId: number, role: UserRole) {
+        const appointment = await this.appRepository.findOne({
+            where: { id: appointmentId },
+            relations: ['doctor']
+        });
+
+        if (!appointment) {
+            return BaseResponse.error('预约不存在');
+        }
+
+        // 只有主治医生可以删除医嘱
+        if (role !== UserRole.Admin && appointment.doctor.id !== userId) {
+            return BaseResponse.error('只有主治医生可以删除医嘱');
+        }
+
+        const prescription = await this.prescriptionRepository.findOne({
+            where: { 
+                id: prescriptionId,
+                record: { appointment_id: appointmentId }
+            },
+            relations: ['record']
+        });
+
+        if (!prescription) {
+            return BaseResponse.error('未找到相关医嘱记录');
+        }
+
+        await this.prescriptionRepository.remove(prescription);
+
+        // 记录操作日志
+        await this.logService.createLog(
+            userId,
+            `删除预约 #${appointmentId} 的医嘱记录 #${prescriptionId}`
+        );
+
+        return BaseResponse.success(null, '删除成功');
     }
 }

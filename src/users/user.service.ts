@@ -94,7 +94,7 @@ export class UserService {
         Object.assign(user, userDto);
         await this.userRepository.save(user);
         await this.logService.createLog(
-            isAdmin,
+            user.id,
             `更新用户 #${id} 信息: ${Object.keys(userDto).join(', ')}`
         );
         return BaseResponse.success(user, '更新用户数据成功');

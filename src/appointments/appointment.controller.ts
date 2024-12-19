@@ -65,4 +65,15 @@ export class AppointmentController {
         const role = request['user']['role'];
         return await this.appointmentService.deletePrescription(id, prescriptionId, userId, role);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Put(':id/cancel')
+    async cancelAppointment(
+        @Param('id', ParseIntPipe) id: number,
+        @Req() request: Request
+    ) {
+        const userId = request['user']['userId'];
+        const role = request['user']['role'];
+        return await this.appointmentService.cancelAppointment(id, userId, role);
+    }
 }

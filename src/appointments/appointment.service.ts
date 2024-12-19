@@ -356,4 +356,42 @@ export class AppointmentService {
 
         return BaseResponse.success(null, '删除成功');
     }
+
+    async cancelAppointment(id: number, userId: number, role: UserRole): Promise<BaseResponse<any>> {
+        const appointment = await this.appRepository.findOne({
+            where: { id },
+            relations: ['patient', 'doctor']
+        });
+
+        if (!appointment) {
+            return BaseResponse.error('预约不存在');
+        }
+
+        // 只有患者本人、主治医生或管理员可以取消预约
+        if (role !== UserRole.Admin 
+            && appointment.doctor.id !== userId 
+            && appointment.patient.id !== userId) {
+            return BaseResponse.error('没有权限取消该预约');
+        }
+
+        // 只能取消待处理或已接受的预约
+        if (appointment.status !== AppointmentStatus.Pending 
+            && appointment.status !== AppointmentStatus.Accepted) {
+            return BaseResponse.error('当前预约状态无法取消');
+        }
+
+        // 更新预约状态为已取消
+        appointment.status = AppointmentStatus.Cancelled;
+        await this.appRepository.save(appointment);
+
+        // 记录操作日志
+        const operatorRole = role === UserRole.Admin ? '管理员' : 
+                           (userId === appointment.doctor.id ? '医生' : '患者');
+        await this.logService.createLog(
+            userId,
+            `${operatorRole}取消预约 #${id} | 患者: ${appointment.patient.real_name || appointment.patient.username}`
+        );
+
+        return BaseResponse.success(null, '预约已取消');
+    }
 }

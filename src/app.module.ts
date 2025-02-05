@@ -10,6 +10,7 @@ import { LogModule } from './log/log.module';
 import { AdminModule } from './admin/admin.module';
 import { MedicationModule } from './medication/medication.module';
 import { AppointmentModule } from './appointments/appointment.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { AppointmentModule } from './appointments/appointment.module';
     LogModule,
     AdminModule,
     MedicationModule,
-    AppointmentModule
+    AppointmentModule,
+    DashboardModule
   ],
   controllers: [AppController],
   providers: [AppService],
